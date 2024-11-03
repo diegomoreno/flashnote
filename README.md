@@ -1,0 +1,1 @@
+Tool to practice identifying musical notes *on the mandolin*. A random note is drawn using [VexFlow](https://github.com/0xfe/vexflow/tree/master). The student should then play the note and, if correctly detected by [PitchDetect](https://github.com/cwilso/PitchDetect/blob/main/js/pitchdetect.js), a new note will be presented for the student to guess.
