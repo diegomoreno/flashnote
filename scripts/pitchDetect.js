@@ -68,47 +68,68 @@ function noteFromPitch(frequency) {
 
 function autoCorrelate(sampleRate) {
   // Implements the ACF2+ algorithm
-  var SIZE = buf.length;
-  var rms = 0;
+  let bufLength = buf.length;
+  let rms = 0;
 
-  for (var i = 0; i < SIZE; i++) {
-    var val = buf[i];
+  for (let i = 0; i < bufLength; i++) {
+    const val = buf[i];
     rms += val * val;
   }
-  rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.01) // not enough signal
+  rms = Math.sqrt(rms / bufLength);
+  if (rms < 0.01) { // not enough signal
     return -1;
+  }
 
-  var r1 = 0, r2 = SIZE - 1, thres = 0.2;
-  for (var i = 0; i < SIZE / 2; i++)
-    if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-  for (var i = 1; i < SIZE / 2; i++)
-    if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
-
-  buf = buf.slice(r1, r2);
-  SIZE = buf.length;
-
-  var c = new Array(SIZE).fill(0);
-  for (var i = 0; i < SIZE; i++)
-    for (var j = 0; j < SIZE - i; j++)
-      c[i] = c[i] + buf[j] * buf[j + i];
-
-  var d = 0; while (c[d] > c[d + 1]) d++;
-  var maxval = -1, maxpos = -1;
-  for (var i = d; i < SIZE; i++) {
-    if (c[i] > maxval) {
-      maxval = c[i];
-      maxpos = i;
+  let r1 = 0;
+  let r2 = bufLength - 1;
+  const threshold = 0.2;
+  for (let i = 0; i < bufLength / 2; i++) {
+    if (Math.abs(buf[i]) < threshold) {
+      r1 = i;
+      break;
     }
   }
-  var T0 = maxpos;
+  for (let i = 1; i < bufLength / 2; i++) {
+    if (Math.abs(buf[bufLength - i]) < threshold) {
+      r2 = bufLength - i;
+      break;
+    }
+  }
 
-  var x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+  buf = buf.slice(r1, r2);
+  bufLength = buf.length;
+
+  let c = new Array(bufLength).fill(0);
+  for (let i = 0; i < bufLength; i++) {
+    for (let j = 0; j < bufLength - i; j++) {
+      c[i] = c[i] + buf[j] * buf[j + i];
+    }
+  }
+
+  let d = 0;
+  while (c[d] > c[d + 1]) {
+    d++;
+  }
+
+  let maxVal = -1;
+  let maxPos = -1;
+  for (let i = d; i < bufLength; i++) {
+    if (c[i] > maxVal) {
+      maxVal = c[i];
+      maxPos = i;
+    }
+  }
+  let t0 = maxPos;
+
+  let x1 = c[t0 - 1], x2 = c[t0], x3 = c[t0 + 1];
   a = (x1 + x3 - 2 * x2) / 2;
   b = (x3 - x1) / 2;
-  if (a) T0 = T0 - b / (2 * a);
+  if (a) {
+    t0 = t0 - b / (2 * a);
+  }
 
   buf = new Float32Array(2048);
+  return sampleRate / t0;
 }
 
 function updatePitch() {
