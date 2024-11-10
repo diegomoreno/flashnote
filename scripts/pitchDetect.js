@@ -108,7 +108,7 @@ function autoCorrelate(sampleRate) {
   b = (x3 - x1) / 2;
   if (a) T0 = T0 - b / (2 * a);
 
-  return sampleRate / T0;
+  buf = new Float32Array(2048);
 }
 
 function updatePitch() {
